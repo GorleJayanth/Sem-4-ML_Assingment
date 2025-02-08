@@ -1,9 +1,9 @@
 import numpy as np
 import pandas as pd
-from google.colab import files
 
-uploaded = files.upload()
-file_name = next(iter(uploaded))
+# Replace 'your_file.xlsx' with the actual file path if it's stored in a known location
+file_name = 'Lab Session Data.xlsx'  
+
 xls = pd.ExcelFile(file_name)
 df = xls.parse('IRCTC Stock Price')
 
