@@ -1,28 +1,20 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from google.colab import files
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import confusion_matrix, classification_report
+from scipy.spatial.distance import minkowski
 
-uploaded = files.upload()
-file_name = next(iter(uploaded))
-xls = pd.ExcelFile(file_name)
+df = pd.read_excel("Judgment_Embeddings_InLegalBERT.xlsx")  
+X = df.drop(columns=["Label"])  
+Y = df["Label"]  
 
-df = pd.read_excel(xls, sheet_name="IRCTC Stock Price")
-df["Price"] = pd.to_numeric(df["Price"], errors="coerce")
-df.dropna(subset=["Price"], inplace=True)
-
-hist_values, bin_edges = np.histogram(df["Price"], bins=10)
-
-plt.figure(figsize=(8, 5))
-plt.hist(df["Price"], bins=10, edgecolor='black', alpha=0.7)
-plt.xlabel("Stock Price")
+feature = "feature_0" 
+plt.hist(df[feature])
+plt.xlabel(feature)
 plt.ylabel("Frequency")
-plt.title("Distribution of IRCTC Stock Prices")
-plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.title(f"Histogram of {feature}")
 plt.show()
-
-mean_val = df["Price"].mean()
-var_val = df["Price"].var()
-
-print(f"Average Stock Price: {mean_val}")
-print(f"Price Variance: {var_val}")
+print(f"Mean of {feature}: {df[feature].mean()}")
+print(f"Variance of {feature}: {df[feature].var()}")
