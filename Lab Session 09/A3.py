@@ -1,11 +1,42 @@
-X_and = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
-y_and = np.array([0, 0, 0, 1])
+def explain_model(pipeline, X_train, X_test, y_train, y_test, feature_names):
+    model_type = 'classification' if isinstance(pipeline.named_steps['stacking'], StackingClassifier) else 'regression'
 
-# Initial weights as given
-initial_weights = np.array([10, 0.2, -0.75])
+    explainer = LimeTabularExplainer(
+        X_train,
+        mode=model_type,
+        feature_names=feature_names,
+        discretize_continuous=True
+    )
 
-# Train with step activation
-trained_weights, errors, epochs_needed = train_perceptron(X_and, y_and, initial_weights.copy())
+    instance = X_test[0]
+    true_label = y_test[0]
 
-print(f"Epochs needed for convergence with step activation: {epochs_needed}")
+    prediction_function = (
+        pipeline.predict_proba if model_type == 'classification' else pipeline.predict
+    )
 
+    prediction = prediction_function([instance])
+    predicted_class = np.argmax(prediction[0]) if model_type == 'classification' else prediction[0]
+
+    print("\nLIME Explanation for 1st Test Instance:")
+    print(f"Actual Class: {true_label}")
+    print(f"Predicted Class: {predicted_class}")
+    if model_type == 'classification':
+        print(f"Predicted Probabilities: {np.round(prediction[0], 4)}")
+
+    exp = explainer.explain_instance(instance, prediction_function)
+
+    try:
+        exp.show_in_notebook()
+    except:
+        print("\nFeature Contributions (LIME):")
+        print(exp.as_list())
+
+file_path = "Judgment_Embeddings_InLegalBERT.xlsx"
+X, y, feature_names = load_data(file_path)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+pipeline = create_pipeline('classification')
+trained_pipeline = train_and_evaluate(pipeline, X_train, X_test, y_train, y_test)
+
+explain_model(trained_pipeline, X_train, X_test, y_train, y_test, feature_names)
